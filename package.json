@@ -1,0 +1,31 @@
+{
+  "name": "advent-of-typescript",
+  "version": "1.0.0",
+  "description": "Exploring TypeScript with Advent of Code",
+  "main": "main.js",
+  "scripts": {
+    "build": "tsc --build tsconfig.json",
+    "run": "node main.js",
+    "brun": "npm run build && npm run run",
+    "test": "node main.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/lucasmoeskops/advent-of-typescript.git"
+  },
+  "keywords": [
+    "advent",
+    "of",
+    "code",
+    "typescript"
+  ],
+  "author": "Lucas Moeskops",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/lucasmoeskops/advent-of-typescript/issues"
+  },
+  "homepage": "https://github.com/lucasmoeskops/advent-of-typescript#readme",
+  "devDependencies": {
+    "@types/node": "^14.0.13"
+  }
+}
