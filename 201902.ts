@@ -1,51 +1,7 @@
 import * as fs from 'fs';
 
+import {Program, runner} from './intcode';
 import {range} from './utils';
-
-type Program = number[];
-
-type Opcode = 1 | 2 | 99;
-
-enum EffectType { INCREMENT, TERMINATE };
-
-type Effect = [EffectType, any[]];
-
-type Instruction = (program: Program, address: number) => Effect;
-
-type InstructionSet = Record<Opcode, Instruction>;
-
-const Instructions: InstructionSet = {
-    1: (program, address) => {
-        const [p, q, r] = program.slice(address + 1, address + 4);
-        program[r] = program[p] + program[q];
-        return [EffectType.INCREMENT, [4]];
-    },
-    2: (program, address) => {
-        const [p, q, r] = program.slice(address + 1, address + 4);
-        program[r] = program[p] * program[q];
-        return [EffectType.INCREMENT, [4]];
-    },
-    99: (program, address) => {
-        return [EffectType.TERMINATE, []];
-    },
-};
-
-function run(program: Program) {
-    let address: number = 0;
-    let effectType: EffectType | null = null;
-    let effectParameters: any[];
-
-    while (effectType !== EffectType.TERMINATE) {
-        [effectType, effectParameters] = Instructions[<Opcode>program[address]](
-            program,
-            address,
-        );
-        
-        if (effectType === EffectType.INCREMENT) {
-            address += effectParameters[0];
-        }
-    }
-}
 
 function readProgram() : Program {
     const data = fs.readFileSync('./201902.txt', 'utf-8');
@@ -63,7 +19,7 @@ function setNounVerb(program: Program, noun: number, verb: number) : void {
 
 const program = readProgram();
 setAlarmState(program);
-run(program);
+runner(program);
 const PartOne = program[0];
 
 function findOutput(program: Program, output: number) : [number, number] {
@@ -72,7 +28,7 @@ function findOutput(program: Program, output: number) : [number, number] {
         range(0, 100).forEach(verb => {
             let instance = [...program];
             setNounVerb(instance, noun, verb);
-            run(instance);
+            runner(instance);
             if (instance[0] === output) {
                 result[0] = noun;
                 result[1] = verb;

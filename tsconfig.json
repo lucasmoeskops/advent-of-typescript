@@ -67,9 +67,13 @@
     "forceConsistentCasingInFileNames": true,  /* Disallow inconsistently-cased references to the same file. */
   },
   "files": [
+    "intcode.ts",
+    "utils.ts",
     "main.ts",
+    "single.ts",
     "201901.ts",
     "201902.ts",
-    "201903.ts"
+    "201903.ts",
+    "201905.ts"
   ]
 }

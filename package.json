@@ -6,7 +6,9 @@
   "scripts": {
     "build": "tsc --build tsconfig.json",
     "run": "node main.js",
+    "one": "node single.js",
     "brun": "npm run build && npm run run",
+    "bone": "npm run build && npm run one",
     "test": "node main.js"
   },
   "repository": {
