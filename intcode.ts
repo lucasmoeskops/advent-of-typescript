@@ -103,14 +103,14 @@ const Instructions: InstructionSet = {
         program[Number(target)] = userInput;
         return [[EffectType.INCREMENT, []]];
     },
-    4: (program, _, parameters) => {
+    4: (_, __, parameters) => {
         return [[EffectType.OUTPUT, parameters], [EffectType.INCREMENT, []]];
     },
-    5: (program, _, parameters) => {
+    5: (_, __, parameters) => {
         const [condition, value] = parameters;
         return condition ? [[EffectType.MOVE, [value]]] : [[EffectType.INCREMENT, []]];
     },
-    6: (program, _, parameters) => {
+    6: (_, __, parameters) => {
         const [condition, value] = parameters;
         return !condition ? [[EffectType.MOVE, [value]]] : [[EffectType.INCREMENT, []]];
     },
