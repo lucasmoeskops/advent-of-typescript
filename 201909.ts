@@ -1,7 +1,6 @@
 import * as fs from 'fs';
 
 import {Program, runner} from './intcode';
-import {combinations, cycle, range0, range} from './utils';
 
 function readProgram(): Program {
     const data = fs.readFileSync('./201909.txt', 'utf-8');

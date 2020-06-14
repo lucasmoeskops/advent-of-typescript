@@ -8,12 +8,10 @@ type ParameterMode = 0 | 1 | 2;
 
 class Instruction {
     opcode: Opcode;
-    modes: ParameterMode[];
     parameters: bigint[];
 
-    constructor(opcode: Opcode, modes: ParameterMode[], parameters: bigint[]) {
+    constructor(opcode: Opcode, parameters: bigint[]) {
         this.opcode = opcode;
-        this.modes = modes;
         this.parameters = parameters;
     }
 }
@@ -23,7 +21,7 @@ enum EffectType {
     MOVE,
     INPUT,
     OUTPUT,
-    SET_RELATIVE_BASE,
+    ADJUST_RELATIVE_BASE,
     TERMINATE,
  };
 
@@ -31,9 +29,7 @@ type Effect = [EffectType, bigint[]];
 
 type InstructionType = (
     program: Program,
-    relativeBase: number, 
     userInput: bigint, 
-    modes: ParameterMode[], 
     parameters: bigint[],
 ) => Effect[];
 
@@ -54,7 +50,20 @@ const OpcodeSize: Record<Opcode,number> = {
     7: 4,
     8: 4,
     9: 2,
-    99: 0,
+    99: 1,
+}
+
+const OpcodeDoesWrite: Record<Opcode,boolean> = {
+    1: true,
+    2: true,
+    3: true,
+    4: false,
+    5: false,
+    6: false,
+    7: true,
+    8: true,
+    9: false,
+    99: false,
 }
 
 const ParameterModeSet: Record<
@@ -79,101 +88,64 @@ const ParameterModeSet: Record<
 };
 
 const Instructions: InstructionSet = {
-    1: (program, relativeBase, _, modes, parameters) => {
-        const [left, right, target] = [
-            ParameterModeSet[modes[0]](program, parameters[0], relativeBase),
-            ParameterModeSet[modes[1]](program, parameters[1], relativeBase),
-            ParameterModeSet[modes[2]](program, parameters[2], relativeBase, true),
-        ];
+    1: (program, _, parameters) => {
+        const [left, right, target] = parameters;
         program[Number(target)] = left + right;
         return [[EffectType.INCREMENT, []]];
     },
-    2: (program, relativeBase, _, modes, parameters) => {
-        const [left, right, target] = [
-            ParameterModeSet[modes[0]](program, parameters[0], relativeBase),
-            ParameterModeSet[modes[1]](program, parameters[1], relativeBase),
-            ParameterModeSet[modes[2]](program, parameters[2], relativeBase, true),
-        ];
+    2: (program, _, parameters) => {
+        const [left, right, target] = parameters;
         program[Number(target)] = left * right;
         return [[EffectType.INCREMENT, []]];
     },
-    3: (program, relativeBase, userInput, modes, parameters) => {
-        const target = ParameterModeSet[modes[0]](
-            program,
-            parameters[0],
-            relativeBase,
-            true,
-        );
+    3: (program, userInput, parameters) => {
+        const [target] = parameters;
         program[Number(target)] = userInput;
         return [[EffectType.INCREMENT, []]];
     },
-    4: (program, relativeBase, _, modes, parameters) => {
-        return [
-            [EffectType.OUTPUT, [
-                ParameterModeSet[modes[0]](program, parameters[0], relativeBase),
-            ]],
-            [EffectType.INCREMENT, []]
-        ];
+    4: (program, _, parameters) => {
+        return [[EffectType.OUTPUT, parameters], [EffectType.INCREMENT, []]];
     },
-    5: (program, relativeBase, _, modes, parameters) => {
-        const [condition, value] = [
-            ParameterModeSet[modes[0]](program, parameters[0], relativeBase),
-            ParameterModeSet[modes[1]](program, parameters[1], relativeBase),
-        ];
-        return condition ?
-            [[EffectType.MOVE, [value]]]
-            : [[EffectType.INCREMENT, []]];
+    5: (program, _, parameters) => {
+        const [condition, value] = parameters;
+        return condition ? [[EffectType.MOVE, [value]]] : [[EffectType.INCREMENT, []]];
     },
-    6: (program, relativeBase, _, modes, parameters) => {
-        const [condition, value] = [
-            ParameterModeSet[modes[0]](program, parameters[0], relativeBase),
-            ParameterModeSet[modes[1]](program, parameters[1], relativeBase),
-        ];
-        return !condition ?
-            [[EffectType.MOVE, [value]]]
-            : [[EffectType.INCREMENT, []]];
+    6: (program, _, parameters) => {
+        const [condition, value] = parameters;
+        return !condition ? [[EffectType.MOVE, [value]]] : [[EffectType.INCREMENT, []]];
     },
-    7: (program, relativeBase, _, modes, parameters) => {
-        const [left, right, target] = [
-            ParameterModeSet[modes[0]](program, parameters[0], relativeBase),
-            ParameterModeSet[modes[1]](program, parameters[1], relativeBase),
-            ParameterModeSet[modes[2]](program, parameters[2], relativeBase, true),
-        ];
+    7: (program, _, parameters) => {
+        const [left, right, target] = parameters;
         program[Number(target)] = left < right ? 1n : 0n;
         return [[EffectType.INCREMENT, []]];
     },
-    8: (program, relativeBase, _, modes, parameters) => {
-        const [left, right, target] = [
-            ParameterModeSet[modes[0]](program, parameters[0], relativeBase),
-            ParameterModeSet[modes[1]](program, parameters[1], relativeBase),
-            ParameterModeSet[modes[2]](program, parameters[2], relativeBase, true),
-        ];
+    8: (program, _, parameters) => {
+        const [left, right, target] = parameters;
         program[Number(target)] = left === right ? 1n : 0n;
         return [[EffectType.INCREMENT, []]];
     },
-    9: (program, relativeBase, _, modes, parameters) => {
-        const value = ParameterModeSet[modes[0]](program, parameters[0], relativeBase);
+    9: (_, __, parameters) => {
         return [
-            [EffectType.SET_RELATIVE_BASE, [BigInt(relativeBase) + value]],
+            [EffectType.ADJUST_RELATIVE_BASE, parameters],
             [EffectType.INCREMENT, []],
         ];
     },
-    99: (_, __, ___, ____) => {
+    99: (_, __, ___) => {
         return [[EffectType.TERMINATE, []]];
     },
 };
 
-function parseInstruction(program: Program, address: number) : Instruction {
+function parseInstruction(program: Program, address: number, relativeBase: number) : Instruction {
     const instruction = program[address];
     const opcode = <Opcode>(Number(instruction % 100n));
-    const parameters = OpcodeSize[opcode] > 1 ?
+    const values = OpcodeSize[opcode] > 1 ?
         range(
             address + 1,
             address + OpcodeSize[opcode],
         ).map(index => program[index])
         : [];
     type IntermediateResult = [ParameterMode[], number];
-    const modes = parameters.reduce<IntermediateResult>(
+    const modes = values.reduce<IntermediateResult>(
         (intermediateResult: IntermediateResult, _) => {
             const [modes, modesNumber] = intermediateResult;
             modes.push(<ParameterMode>(modesNumber % 10));
@@ -181,7 +153,16 @@ function parseInstruction(program: Program, address: number) : Instruction {
         },
         [[], Math.floor(Number(instruction / 100n))]
     )[0];
-    return new Instruction(opcode, modes, parameters);
+    const writeIndex = OpcodeDoesWrite[opcode] ? OpcodeSize[opcode] - 2 : -1;
+    const parameters = range(0, OpcodeSize[opcode] - 1).map(index => {
+        return ParameterModeSet[modes[index]](
+            program,
+            values[index],
+            relativeBase,
+            index === writeIndex,
+        )
+    });
+    return new Instruction(opcode, parameters);
 }
 
 function* run(program: Program) : Generator<bigint | null, void, bigint | null> {
@@ -190,19 +171,19 @@ function* run(program: Program) : Generator<bigint | null, void, bigint | null> 
     let relativeBase: number = 0;
     
     while (true) {
-        const instruction: Instruction = parseInstruction(program, address);
+        const instruction: Instruction = parseInstruction(
+            program,
+            address,
+            relativeBase,
+        );
 
         if (instruction.opcode === 3) {
             currentInput = <bigint>(yield null);
         }
 
-        // console.log(instruction);
-
         const effects = Instructions[instruction.opcode](
             program,
-            relativeBase,
             currentInput,
-            instruction.modes,
             instruction.parameters,
         );
         
@@ -213,8 +194,8 @@ function* run(program: Program) : Generator<bigint | null, void, bigint | null> 
                 address = Number(parameters[0]);
             } else if (effectType === EffectType.OUTPUT) {
                 yield parameters[0];
-            } else if (effectType === EffectType.SET_RELATIVE_BASE) {
-                relativeBase = Number(parameters[0]);
+            } else if (effectType === EffectType.ADJUST_RELATIVE_BASE) {
+                relativeBase += Number(parameters[0]);
             } else if (effectType === EffectType.TERMINATE) {
                 return;
             }
