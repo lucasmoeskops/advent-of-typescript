@@ -4,24 +4,24 @@ import {Program, runner} from './intcode';
 
 function readProgram(): Program {
     const data = fs.readFileSync('./201905.txt', 'utf-8');
-    return data.split(',').map(Number);
+    return data.split(',').map(BigInt);
 }
 
-function testAirConditioner(program: Program): number | void {
+function testAirConditioner(program: Program): bigint | void {
     const programRunner = runner(program);
-    programRunner.send([1]);
-    let finalValue: number | void;
-    while ((finalValue = programRunner.read()) === 0) {
+    programRunner.send([1n]);
+    let finalValue: bigint | void;
+    while ((finalValue = programRunner.read()) === 0n) {
         break;
     }
     return finalValue;
 }
 
-function testThermalRadiators(program: Program): number | void {
+function testThermalRadiators(program: Program): bigint | void {
     const programRunner = runner(program);
-    programRunner.send([5]);
-    let finalValue: number | void;
-    while ((finalValue = programRunner.read()) === 0) {
+    programRunner.send([5n]);
+    let finalValue: bigint | void;
+    while ((finalValue = programRunner.read()) === 0n) {
         break;
     }
     return finalValue;
