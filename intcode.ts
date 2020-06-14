@@ -47,7 +47,7 @@ const ParameterModeSet: Record<ParameterMode, (program: Program, value: number) 
 };
 
 const Instructions: InstructionSet = {
-    1: (program, userInput, modes, parameters) => {
+    1: (program, _, modes, parameters) => {
         const [left, right] = [
             ParameterModeSet[modes[0]](program, parameters[0]),
             ParameterModeSet[modes[1]](program, parameters[1]),
@@ -55,7 +55,7 @@ const Instructions: InstructionSet = {
         program[parameters[2]] = left + right;
         return [[EffectType.INCREMENT, []]];
     },
-    2: (program, userInput, modes, parameters) => {
+    2: (program, _, modes, parameters) => {
         const [left, right] = [
             ParameterModeSet[modes[0]](program, parameters[0]),
             ParameterModeSet[modes[1]](program, parameters[1]),
@@ -63,31 +63,31 @@ const Instructions: InstructionSet = {
         program[parameters[2]] = left * right;
         return [[EffectType.INCREMENT, []]];
     },
-    3: (program, userInput, modes, parameters) => {
+    3: (program, userInput, _, parameters) => {
         program[parameters[0]] = userInput;
         return [[EffectType.INCREMENT, []]];
     },
-    4: (program, userInput, modes, parameters) => {
+    4: (program, _, modes, parameters) => {
         return [
             [EffectType.OUTPUT, [ParameterModeSet[modes[0]](program, parameters[0])]],
             [EffectType.INCREMENT, []]
         ];
     },
-    5: (program, userInput, modes, parameters) => {
+    5: (program, _, modes, parameters) => {
         const [condition, value] = [
             ParameterModeSet[modes[0]](program, parameters[0]),
             ParameterModeSet[modes[1]](program, parameters[1]),
         ];
         return [condition ? [EffectType.MOVE, [value]] : [EffectType.INCREMENT, []]];
     },
-    6: (program, userInput, modes, parameters) => {
+    6: (program, _, modes, parameters) => {
         const [condition, value] = [
             ParameterModeSet[modes[0]](program, parameters[0]),
             ParameterModeSet[modes[1]](program, parameters[1]),
         ];
         return [!condition ? [EffectType.MOVE, [value]] : [EffectType.INCREMENT, []]];
     },
-    7: (program, userInput, modes, parameters) => {
+    7: (program, _, modes, parameters) => {
         const [left, right] = [
             ParameterModeSet[modes[0]](program, parameters[0]),
             ParameterModeSet[modes[1]](program, parameters[1]),
@@ -95,7 +95,7 @@ const Instructions: InstructionSet = {
         program[parameters[2]] = left < right ? 1 : 0;
         return [[EffectType.INCREMENT, []]];
     },
-    8: (program, userInput, modes, parameters) => {
+    8: (program, _, modes, parameters) => {
         const [left, right] = [
             ParameterModeSet[modes[0]](program, parameters[0]),
             ParameterModeSet[modes[1]](program, parameters[1]),
@@ -103,7 +103,7 @@ const Instructions: InstructionSet = {
         program[parameters[2]] = left === right ? 1 : 0;
         return [[EffectType.INCREMENT, []]];
     },
-    99: (program, userInput, modes, parameters) => {
+    99: (_, __, ___, ____) => {
         return [[EffectType.TERMINATE, []]];
     },
 };
