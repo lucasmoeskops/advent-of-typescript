@@ -31,11 +31,7 @@ class Point {
 }
 
 class Screen {
-    data: Record<string,Tile>
-
-    constructor() {
-        this.data = {};
-    }
+    data: Record<string,Tile> = {};
 
     getTile(point: Point) {
         const tile = this.data[point.toString()];
@@ -77,7 +73,6 @@ function scoreAfterBeaten(program: Program): number {
     playFree(program);
     const programRunner = runner(program);
     const screen = new Screen();
-    let score = 0;
     let blocksLeft = 0;
     let ballX = 0;
     let paddleX = 0;
@@ -88,10 +83,8 @@ function scoreAfterBeaten(program: Program): number {
         const tileOrScore = programRunner.read();
 
         if (x === -1n) {
-            score = Number(tileOrScore);
-
             if (blocksLeft === 0) {
-                return score;
+                return Number(tileOrScore);
             }
         } else if (tileOrScore === undefined) {
             programRunner.send([BigInt(Math.sign(ballX - paddleX))]);
