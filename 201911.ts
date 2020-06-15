@@ -37,16 +37,10 @@ class Robot {
     applyDirectionCommand(command: DirectionCommand) {
         const relValue = command === 0 ? 3 : 1;
         this.direction = <Direction>((this.direction + relValue) % 4);
-
-        if (this.direction === 0) {
-            this.point.adjust(0, -1); 
-        } else if (this.direction === 1) {
-            this.point.adjust(1, 0);
-        } else if (this.direction === 2) {
-            this.point.adjust(0, 1);
-        } else {
-            this.point.adjust(-1, 0);
-        }
+        this.point.adjust(
+            Math.round(Math.sin(this.direction * Math.PI / 2)),
+            -Math.round(Math.cos(this.direction * Math.PI / 2)),
+        )
     }
 }
 
@@ -74,14 +68,12 @@ class Area {
         } else {
             if (point.x < this.minX) {
                 this.minX = point.x;
-            }
-            if (point.x > this.maxX) {
+            } else if (point.x > this.maxX) {
                 this.maxX = point.x;
             }
             if (point.y < this.minY) {
                 this.minY = point.y;
-            }
-            if (point.y > this.maxY) {
+            } else if (point.y > this.maxY) {
                 this.maxY = point.y;
             }
         }
