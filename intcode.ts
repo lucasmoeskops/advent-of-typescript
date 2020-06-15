@@ -169,6 +169,7 @@ function* run(program: Program) : Generator<bigint | null, void, bigint | null> 
     let address: number = 0;
     let currentInput: bigint = 0n;
     let relativeBase: number = 0;
+    let end = 50;
     
     while (true) {
         const instruction: Instruction = parseInstruction(
@@ -224,7 +225,7 @@ function runner(program: Program): ProgramInterface {
 
     return {
         read () {
-            const value = outputBuffer.pop();
+            const value = outputBuffer.shift();
             process();
             return value;
         },

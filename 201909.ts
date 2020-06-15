@@ -8,13 +8,13 @@ function readProgram(): Program {
 }
 
 function getBoostKeycode(program: Program): bigint | void {
-    const programRunner = runner({...program});
+    const programRunner = runner(program);
     programRunner.send([1n]);
     return programRunner.read();
 }
 
 function getDistressSignalCoordinates(program: Program): bigint | void {
-    const programRunner = runner({...program});
+    const programRunner = runner(program);
     programRunner.send([2n]);
     return programRunner.read();
 }
