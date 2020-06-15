@@ -109,7 +109,7 @@ class Area {
         });
     }
 
-    mirrorVertical() {
+    flipHorizontal() {
         const area = new Area();
         range(this.minY, this.maxY + 1).forEach(row => {
             range(this.minX, this.maxX + 1).forEach(col => {
@@ -191,7 +191,7 @@ function readArea(area: Area): string {
         object.forEach(point => area.setColor(point, 1));
         if (cycles === 0) {
             if (tails.length === 2) {
-                if (area.equals(area.mirrorVertical())) {
+                if (area.equals(area.flipHorizontal())) {
                     if (tails.every(tail => tail.direction === 2)) {
                         return 'M';
                     }
@@ -215,7 +215,7 @@ function readArea(area: Area): string {
                 }
                 return 'G';
             } else if (tails.length === 3) {
-                if (area.equals(area.mirrorVertical())) {
+                if (area.equals(area.flipHorizontal())) {
                     if (tails.some(tail => tail.direction === 1)) {
                         return 'T';
                     }
@@ -226,7 +226,7 @@ function readArea(area: Area): string {
                 }
                 return 'E';
             } else {
-                if (area.equals(area.mirrorVertical())) {
+                if (area.equals(area.flipHorizontal())) {
                     if (tails.some(tail => tail.direction === 0)) {
                         return 'H';
                     } else if (tails.some(tail => tail.direction === 1)) {
@@ -238,7 +238,7 @@ function readArea(area: Area): string {
             }
         } else if (cycles === 1) {
             if (tails.length === 0) {
-                if (area.equals(area.mirrorVertical())) {
+                if (area.equals(area.flipHorizontal())) {
                     return 'O';
                 }
                 return 'D';
@@ -248,7 +248,7 @@ function readArea(area: Area): string {
                 }
                 return 'Q';
             } else {
-                if (area.equals(area.mirrorVertical())) {
+                if (area.equals(area.flipHorizontal())) {
                     return 'A';
                 }
                 return 'R';
