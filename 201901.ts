@@ -1,6 +1,6 @@
 import * as fs from 'fs';
 
-function readMasses() : Array<number> {
+function readMasses() : number[] {
     const data = fs.readFileSync('./201901.txt', 'utf-8');
     return data.split('\n').map(Number);
 }
@@ -14,8 +14,11 @@ function partTwoFuelRequired(mass: number): number {
     return part > 0 ? part + partTwoFuelRequired(part) : 0;
 }
 
-const masses: Array<number> = readMasses()
-const sum = (ns: Array<number>) : number => ns.reduce((p, n) => p + n);
+function sum(numbers: number[]): number {
+    return numbers.reduce((acc, n) => acc + n, 0);
+}
+
+const masses: number[] = readMasses()
 const PartOne = sum(masses.map(fuelRequired));
 const PartTwo = sum(masses.map(partTwoFuelRequired));
 

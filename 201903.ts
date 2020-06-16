@@ -2,7 +2,7 @@ import * as fs from 'fs';
 
 type Situation = [Wire, Wire];
 
-type Wire = Array<LineDirective>;
+type Wire = LineDirective[];
 
 type Line = [Point, Point];
 
@@ -35,7 +35,7 @@ function readSituation() : Situation {
     return [wires[0], wires[1]];
 }
 
-function calculateIntersections(wire1: Wire, wire2: Wire) : Array<Point> {
+function calculateIntersections(wire1: Wire, wire2: Wire) : Point[] {
     function validIntersection(point: Point) {
         return point.x !== 0 || point.y !== 0;
     }
@@ -43,7 +43,7 @@ function calculateIntersections(wire1: Wire, wire2: Wire) : Array<Point> {
         wireToLines(wire1).map(normalizeLine), 
         wireToLines(wire2).map(normalizeLine),
     ];
-    return lines[0].reduce<Array<Point>>((points: Array<Point>, line: Line) => {
+    return lines[0].reduce<Array<Point>>((points: Point[], line: Line) => {
         return points.concat(
             lines[1].map(line2 => intersectsAt(line, line2))
                     .filter(validIntersection)
@@ -74,8 +74,8 @@ function lineLength(line: Line) : number {
     return Math.abs(line[0].x - line[1].x) + Math.abs(line[0].y - line[1].y);
 }
 
-function wireToLines(wire: Wire) : Array<Line> {
-    type IntermediateResult = [Array<Line>, Point];
+function wireToLines(wire: Wire) : Line[] {
+    type IntermediateResult = [Line[], Point];
     const locationMap: Record<string, (point: Point, amount: number) => Point> = {
         "U": (point, amount) => new Point(point.x, point.y - amount),
         "R": (point, amount) => new Point(point.x + amount, point.y),
