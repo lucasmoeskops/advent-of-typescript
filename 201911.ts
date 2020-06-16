@@ -153,8 +153,7 @@ function countPaintedPanels(program: Program): number {
     const brain = runner(program);
     while (true) {
         brain.send([BigInt(area.getColor(robot.point))]);
-        const color = brain.read();
-        const direction = brain.read();
+        const [color, direction] = brain.read(2);
         if (color === undefined || direction === undefined) {
             return Object.keys(area.fillData).length;
         }
@@ -170,8 +169,7 @@ function printIdentifier(program: Program): string {
     const brain = runner(program);
     while (true) {
         brain.send([BigInt(area.getColor(robot.point))]);
-        const color = brain.read();
-        const direction = brain.read();
+        const [color, direction] = brain.read(2);
         if (color === undefined || direction === undefined) {
             return readArea(area);
         }

@@ -11,14 +11,14 @@ function testAirConditioner(program: Program): bigint | void {
     const programRunner = runner(program);
     programRunner.send([1n]);
     let finalValue: bigint | void;
-    while ((finalValue = programRunner.read()) === 0n) {}
+    while ((finalValue = programRunner.read()[0]) === 0n) {}
     return finalValue;
 }
 
 function testThermalRadiators(program: Program): bigint | void {
     const programRunner = runner(program);
     programRunner.send([5n]);
-    return programRunner.read();
+    return programRunner.read()[0];
 }
 
 const PartOne = testAirConditioner(readProgram());

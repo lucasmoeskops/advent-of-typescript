@@ -36,7 +36,7 @@ type InstructionType = (
 type InstructionSet = Record<Opcode, InstructionType>;
 
 export interface ProgramInterface {
-    read (): bigint | void;
+    read (num?: number): (bigint | void)[];
     send (input: bigint[]): void;
 }
 
@@ -224,10 +224,10 @@ function runner(program: Program): ProgramInterface {
     process();
 
     return {
-        read () {
-            const value = outputBuffer.shift();
+        read (number = 1) {
+            const values = outputBuffer.splice(0, number);
             process();
-            return value;
+            return values;
         },
         send (input) {
             for (const item of input) {

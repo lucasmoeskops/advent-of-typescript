@@ -52,9 +52,8 @@ function countScreenTiles(program: Program): number {
     const programRunner = runner(program);
     const screen = new Screen();
     while (true) {
-        const x = programRunner.read();
-        const y = programRunner.read();
-        const tile = programRunner.read();
+        const [x, y, tile] = programRunner.read(3);
+
         if (tile !== undefined) {
             screen.setTile(new Point(Number(x), Number(y)), <Tile>Number(tile));
         } else {
@@ -78,9 +77,7 @@ function scoreAfterBeaten(program: Program): number {
     let paddleX = 0;
 
     while (true) {
-        const x = programRunner.read();
-        const y = programRunner.read();
-        const tileOrScore = programRunner.read();
+        const [x, y, tileOrScore] = programRunner.read(3);
 
         if (x === -1n) {
             if (blocksLeft === 0) {

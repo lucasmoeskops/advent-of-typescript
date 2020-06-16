@@ -16,7 +16,7 @@ function findLargestOutputSignal(program: Program): number | void {
         });
         return amplifiers.reduce<bigint>((input, amplifier) => {
             amplifier.send([input]);
-            return <bigint>amplifier.read();
+            return <bigint>amplifier.read()[0];
         }, 0n);
     }).map(Number));
 }
@@ -32,7 +32,7 @@ function feedbackFindLargestOutputSignal(program: Program): number | void {
         while (true) {
             const amplifier = amplifierLoop.next().value;
             amplifier.send([<bigint>lastResult]);
-            const value = amplifier.read();
+            const [value] = amplifier.read();
             if (value === undefined) {
                 return <bigint>lastResult;
             }
