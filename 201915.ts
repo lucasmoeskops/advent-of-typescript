@@ -71,10 +71,10 @@ function explore(program: Program, goal: Goal): Situation | void {
 
     while (inspectQueue.length) {
         const [program, direction, point, distance] = <Inspection>inspectQueue.shift();
-        const programRunner = runner(program);
         let status = Status.OK;
 
         if (direction !== null) {
+            const programRunner = runner(program);
             programRunner.send([BigInt(direction)]);
             status = Number(programRunner.read()[0]);
         }
