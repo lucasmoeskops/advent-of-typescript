@@ -1,6 +1,9 @@
 import * as fs from 'fs';
 
-import {Program, runner} from './intcode';
+import { Program, runner } from './intcode';
+import { Point, neighbours } from './point';
+import { HashMap } from './structures';
+import { zip } from './utils';
 
 enum MovementCommand {
     NORTH = 1,
@@ -21,33 +24,6 @@ enum Goal {
     MAX_DISTANCE = 2,
 }
 
-class Point {
-    x: number;
-    y: number;
-
-    constructor(x: number, y: number) {
-        this.x = x;
-        this.y = y;
-    }
-
-    toString() {
-        return [this.x, this.y].join(';');
-    }
-}
-
-class Area {
-    data: Record<string,[Status,number]> = {}
-
-    getLocation(point: Point): [Status, number] {
-        const location = this.data[point.toString()];
-        return location === undefined ? [Status.UNKNOWN, -1] : location;
-    }
-
-    setLocation(point: Point, status: Status, distance: number) {
-        this.data[point.toString()] = [status, distance];
-    }
-}
-
 const DIRECTIONS = [
     MovementCommand.NORTH,
     MovementCommand.EAST,
@@ -55,7 +31,9 @@ const DIRECTIONS = [
     MovementCommand.WEST,
 ];
 
-type Situation = [Program, Area, Point];
+type Location = [Status, number];
+
+type Situation = [Program, HashMap<Location>, Point];
 
 function readProgram(): Program {
     const data = fs.readFileSync('./201915.txt', 'utf-8');
@@ -64,7 +42,7 @@ function readProgram(): Program {
 
 function explore(program: Program, goal: Goal): Situation | void {
     type Inspection = [Program, MovementCommand | null, Point, number];
-    const area = new Area();
+    const area = new HashMap<Location>([Status.UNKNOWN, -1]);
     const inspectQueue: Inspection[] = [[program, null, new Point(0, 0), 0]];
     let farthestPoint: Point = new Point(0, 0);
     let maxDistance = 0;
@@ -79,7 +57,7 @@ function explore(program: Program, goal: Goal): Situation | void {
             status = Number(programRunner.read()[0]);
         }
 
-        area.setLocation(point, status, distance);
+        area.set(point, [status, distance]);
 
         if (goal === Goal.OXYGEN_SYSTEM && status === Status.AT_OXYGEN_SYSTEM) {
             return [program, area, point];
@@ -89,15 +67,17 @@ function explore(program: Program, goal: Goal): Situation | void {
                 farthestPoint = point;
             }
              
-            DIRECTIONS.forEach((direction, index) => {
-                const neighbour = new Point(
-                    point.x + Math.round(Math.sin(index * Math.PI / 2)),
-                    point.y - Math.round(Math.cos(index * Math.PI / 2)),
-                );
-                const [status, _] = area.getLocation(neighbour);
+            zip(DIRECTIONS, neighbours(point)).forEach((entry) => {
+                const [direction, neighbour] = entry;
+                const [status, _] = area.get(neighbour);
                 
                 if (status === Status.UNKNOWN) {
-                    inspectQueue.push([{...program}, direction, neighbour, distance + 1]);
+                    inspectQueue.push([
+                        {...program},
+                        direction,
+                        neighbour,
+                        distance + 1,
+                    ]);
                 }
             })
         }
@@ -109,8 +89,8 @@ function explore(program: Program, goal: Goal): Situation | void {
 }
 
 let [program, area, point] = <Situation>explore(readProgram(), Goal.OXYGEN_SYSTEM);
-const PartOne = area.getLocation(point)[1];
+const PartOne = area.get(point)[1];
 [program, area, point] = <Situation>explore(program, Goal.MAX_DISTANCE);
-const PartTwo = area.getLocation(point)[1];
+const PartTwo = area.get(point)[1];
 
 export { PartOne, PartTwo };

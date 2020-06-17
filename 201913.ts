@@ -1,6 +1,8 @@
 import * as fs from 'fs';
 
 import {Program, runner} from './intcode';
+import {Point} from './point';
+import {HashMap} from './structures';
 
 enum Tile {
     EMPTY = 0,
@@ -16,33 +18,6 @@ enum Joystick {
     TILT_RIGHT = 1,
 }
 
-class Point {
-    x: number;
-    y: number;
-
-    constructor(x: number, y: number) {
-        this.x = x;
-        this.y = y;
-    }
-
-    toString() {
-        return [this.x, this.y].join(';');
-    }
-}
-
-class Screen {
-    data: Record<string,Tile> = {};
-
-    getTile(point: Point) {
-        const tile = this.data[point.toString()];
-        return tile === undefined ? Tile.EMPTY : tile;
-    }
-
-    setTile(point: Point, tile: Tile) {
-        this.data[point.toString()] = tile;
-    }
-}
-
 function readProgram(): Program {
     const data = fs.readFileSync('./201913.txt', 'utf-8');
     return data.split(',').map(BigInt);
@@ -50,16 +25,14 @@ function readProgram(): Program {
 
 function countScreenTiles(program: Program): number {
     const programRunner = runner(program);
-    const screen = new Screen();
+    const screen = new HashMap<Tile>(Tile.EMPTY);
     while (true) {
         const [x, y, tile] = programRunner.read(3);
 
         if (tile !== undefined) {
-            screen.setTile(new Point(Number(x), Number(y)), <Tile>Number(tile));
+            screen.set(new Point(Number(x), Number(y)), <Tile>Number(tile));
         } else {
-            return Object.values(screen.data)
-                         .filter(value => value === Tile.BLOCK)
-                         .length;
+            return screen.values().filter(value => value === Tile.BLOCK).length;
         }
     }
 }
@@ -71,7 +44,7 @@ function playFree(program: Program): void {
 function scoreAfterBeaten(program: Program): number {
     playFree(program);
     const programRunner = runner(program);
-    const screen = new Screen();
+    const screen = new HashMap<Tile>(Tile.EMPTY);
     let blocksLeft = 0;
     let ballX = 0;
     let paddleX = 0;
@@ -89,7 +62,7 @@ function scoreAfterBeaten(program: Program): number {
             const point = new Point(Number(x), Number(y));
             const tile = <Tile>Number(tileOrScore);
 
-            if (screen.getTile(point) === Tile.BLOCK) {
+            if (screen.get(point) === Tile.BLOCK) {
                 blocksLeft -= 1;
             } else if (tile === Tile.BLOCK) {
                 blocksLeft += 1;
@@ -101,7 +74,7 @@ function scoreAfterBeaten(program: Program): number {
                 paddleX = point.x;
             }
 
-            screen.setTile(point, tile);
+            screen.set(point, tile);
         }
     }
 }

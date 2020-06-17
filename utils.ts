@@ -17,3 +17,9 @@ export const cycle = function* <T>(elements: T[]): Generator<T, never, null> {
 };
 export const range0 = (to: number): number[] => [...Array(to).keys()]
 export const range = (from: number, to: number): number[] => range0(to - from).map(i => i + from);
+export function zip<T,U> (array1: T[], array2: U[]) : [T,U][] {
+    return range(
+        0,
+        Math.min(array1.length, array2.length)
+    ).map(index => [array1[index], array2[index]]);
+}
